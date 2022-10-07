@@ -30,7 +30,7 @@ jobs:
       - name: Run Mac Packager
         run: |
           pwd
-          ${GITHUB_WORKSPACE}/scripts/pkg/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
+          ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
       - name: Inspect
         run: ls -lR
 
