@@ -48,7 +48,7 @@ codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timest
 ###############################################################################################################
 echo "Building Package...."            
 cd ${BLDDIR}/scripts/mac/
-bash packager/build-package.sh Mondoo ${VERSION} 
+bash packager/build-package.sh cnquery ${VERSION} 
 
 PKG=packager/target/pkg/cnquery-macos-universal-${VERSION}.pkg
 if [ -f $PKG ]; then
