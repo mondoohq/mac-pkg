@@ -17,8 +17,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Put binaries in dist/macos
         run: |
-          pwd
-          env
+          pwd && env  # For debugging
           mkdir -p dist/macos/ 
           cd ${GITHUB_WORKSPACE}/dist/macos/
           mkdir mac_darwin_amd64 && cd mac_darwin_amd64
@@ -26,7 +25,7 @@ jobs:
           #curl -L https://github.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_amd64.tar.gz | tar xfvz -
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_amd64.tar.gz | tar xfvz -
           cd ${GITHUB_WORKSPACE}/dist/macos/
-          mkdir mac_darwin_amd64 && cd mac_darwin_arm64
+          mkdir mac_darwin_arm64 && cd mac_darwin_arm64
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_arm64.tar.gz | tar xfvz -   
       - name: Run Mac Packager
         run: scripts/pkg/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
