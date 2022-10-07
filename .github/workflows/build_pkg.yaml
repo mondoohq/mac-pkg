@@ -28,7 +28,9 @@ jobs:
           mkdir mac_darwin_arm64 && cd mac_darwin_arm64
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_arm64.tar.gz | tar xfvz -   
       - name: Run Mac Packager
-        run: scripts/pkg/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
+        run: |
+          pwd
+          ${GITHUB_WORKSPACE}/scripts/pkg/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
       - name: Inspect
         run: ls -lR
 
