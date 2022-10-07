@@ -32,6 +32,7 @@ jobs:
       - name: Run Mac Packager
         run: |
           pwd
+          ls -lR
           ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ env.CNQUERY_VERSION }}
       - name: Inspect
         run: ls -lR
