@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install mitchellh/gon
+        run: brew install mitchellh/gon/gon
       - name: Put binaries in dist/macos
         run: |
           pwd && env  # For debugging
