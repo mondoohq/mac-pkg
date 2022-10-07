@@ -9,18 +9,23 @@ env:
   CNQUERY_VERSION: '6.18.0-alpha2'
 
 jobs:
-  deployment:
+  pkg:
+    name: 'Packaging: Mac'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Put binaries in dist/macos
         run: |
-          mkdir -p dist/macos/ && cd dist/macos/
+          pwd
+          env
+          mkdir -p dist/macos/ 
+          cd ${GITHUB_WORKSPACE}/dist/macos/
           mkdir mac_darwin_amd64 && cd mac_darwin_amd64
           # curl doesn't work because the repo is currently private, fake it on cuddletech
           #curl -L https://github.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_amd64.tar.gz | tar xfvz -
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_amd64.tar.gz | tar xfvz -
+          cd ${GITHUB_WORKSPACE}/dist/macos/
           mkdir mac_darwin_amd64 && cd mac_darwin_arm64
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_arm64.tar.gz | tar xfvz -   
       - name: Run Mac Packager
