@@ -1,0 +1,24 @@
+name: Build MacOS Package for cnquery
+
+on:
+  workflow_dispatch:  
+
+env:
+  CNQUERY_VERSION: '6.18.0-alpha2'
+
+jobs:
+  pkg:
+    name: 'Packaging: Mac'
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup keychain for signing certificates
+        uses: apple-actions/import-codesign-certs@v1
+        with: 
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_INSTALLER }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PW }}
+      - name: Investigate
+        run: |
+          security find-identity -v
+
