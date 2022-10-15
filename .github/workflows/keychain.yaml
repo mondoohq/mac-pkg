@@ -1,4 +1,4 @@
-name: Build MacOS Package for cnquery
+name: Keychain Test Action
 
 on:
   workflow_dispatch:  
@@ -8,7 +8,7 @@ env:
 
 jobs:
   pkg:
-    name: 'Packaging: Mac'
+    name: 'Key Setup'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
