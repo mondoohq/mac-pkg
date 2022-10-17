@@ -25,6 +25,6 @@ jobs:
         run: |
           curl -O https://releases.mondoo.io/cnquery/7.0.0-alpha1/cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           tar xfvz cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
-          codesign -s "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ./cnquery
+          codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ./cnquery
 
 
