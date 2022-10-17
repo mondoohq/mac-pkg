@@ -5,12 +5,7 @@ if [ ! -f /usr/bin/lipo ]; then
   exit 1
 fi
 
-if which gon >/dev/null; then 
-  echo "" >/dev/null
-else
-  echo "ERROR: This script requires gon, please see https://github.com/mitchellh/gon for installation"
-  exit 1
-fi
+
 
 if [[ $1 == "" ]]; then
   echo "USAGE: $0 <mondoo_version>"
@@ -22,65 +17,53 @@ VERSION=$1
 TIME=`/bin/date +%s`
 BLDDIR=${PWD}
 
+if [[ ! $PKGNAME ]]; then
+  echo "ERROR: PKGNAME not set"
+  exit 1
+fi 
+
 echo "Packaging Release ${VERSION}"
 
-
-
 ###############################################################################################################
-echo "Creating Universal Binary...."    
-cd dist/macos/
-/usr/bin/lipo -create -output cnquery mac_darwin_amd64/cnquery mac_darwin_arm64/cnquery
-if [ ! -f cnquery ]; then
-  echo "ERROR: Failure in creating universal binary, please investigate lipo create in $PWD"
-  exit 2
-else
-  mkdir -p ${BLDDIR}/scripts/pkg/mac/packager/application/bin/
-  cp mondoo ${BLDDIR}/scripts/pkg/mac/packager/application/bin/
-fi
-
-
-###############################################################################################################
-echo "Signing Universal Binary...."    
-codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ${BLDDIR}/scripts/mac/packager/application/bin/cnquery
-
+# Pull Latest Binaries & Create Universal Binaries
+for DIST in mondoo cnquery cnspec; do
+  cd $BLDDIR
+  mkdir -p dist/${DIST}
+  for ARCH in amd64 arm64; do
+    cd ${BLDDIR}/dist/${DIST}
+    echo "Downloading ${DIST} for ${ARCH}"
+    mkdir ${ARCH} && cd ${ARCH}
+    curl -sL -o ${DIST}-${ARCH}.tgz https://install.mondoo.com/package/${DIST}/darwin/${ARCH}/tar.gz/latest/download
+    tar -xzf ${DIST}-${ARCH}.tgz
+    rm ${DIST}-${ARCH}.tgz
+  done
+  cd $BLDDIR/dist/${DIST}
+  echo "Creating Universal Binary for ${DIST}..."
+  /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
+  if [ ! -f ${DIST} ]; then
+    echo "ERROR: Failed to create universal ${DIST} binary"
+    exit 1
+  fi
+  echo "Code Signing ${DIST}..."
+  codesign -s "${APPLE_KEYS_CODESIGN_ID}" -f -v --timestamp --options runtime ${DIST}
+  mkdir -p ${BLDDIR}/script/mac/packager/application/bin/
+  cp ${DIST} ${BLDDIR}/script/mac/packager/application/bin/
+done
 
 
 ###############################################################################################################
 echo "Building Package...."            
 cd ${BLDDIR}/scripts/mac/
-bash packager/build-package.sh cnquery ${VERSION} 
+bash packager/build-package.sh ${PKGNAME} ${VERSION} 
 
-PKG=packager/target/pkg/cnquery-macos-universal-${VERSION}.pkg
+PKG=${BLDDIR}/scripts/mac/packager/target/pkg/${PKGNAME}-macos-universal-${VERSION}.pkg
 if [ -f $PKG ]; then
   mv $PKG .
-  echo "SUCCESS! Your package is ready to rock, hot and fresh: cnquery-macos-universal-${VERSION}.pkg"
+  echo "SUCCESS! Your package is ready to rock, hot and fresh: ${PKGNAME}-macos-universal-${VERSION}.pkg"
 else 
   echo "ERROR: Something went wrong building the package... time to debug. :(" 
   exit 2
 fi
 
-
-###############################################################################################################
-echo "Signing Package..."               
-productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)"cnquery-macos-universal-${VERSION}.pkg cnquery_${VERSION}_darwin_universal.pkg
-if [ ! -f cnquery_${VERSION}_darwin_universal.pkg ]; then
-  echo "ERROR: Signing failed. :("
-  exit 2
-fi
-
-
-###############################################################################################################
-echo "Notorizing Package with user ${APPLE_ID_USERNAME}...."           
-cat notorize.hcl.tmpl | sed s/PACKAGE_PATH/cnquery_${VERSION}_darwin_universal.pkg/ \
-                      | sed s/APPLE_ID_USERNAME/${APPLE_ID_USERNAME}/ \
-                      | sed s/APPLE_ID_PASSWORD/${APPLE_ID_PASSWORD}/  > notorize.hcl 
-gon -log-level=info notorize.hcl
-
-
-###############################################################################################################
-echo "Copying package to dist...."      
-shasum -a 256 cnquery_${VERSION}_darwin_universal.pkg >> ${BLDDIR}/dist/macos/checksums.macos.txt 
-cp cnquery_${VERSION}_darwin_universal.pkg ${BLDDIR}/dist/macos/
-
-ls -l ${BLDDIR}/dist/macos/${PKG_NAME}
-echo "All done here. Good bye."         
+# Done!  Copy to dist for next step!  (Sign & Notarize)
+cp ${PKG} ${BLDDIR}/dist/
