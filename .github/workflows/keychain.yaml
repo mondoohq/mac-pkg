@@ -18,7 +18,25 @@ jobs:
         with: 
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_INSTALLER }}
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PW }}
-      - name: Investigate
+      - name: Show Security Identities
         run: |
           security find-identity -v
+      - name: Codesign executable
+        env:
+          CODESIGN_ID: "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)"
+          PRODUCTSIGN_ID: "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)"
+          MACOS_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE_INSTALLER }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_CERTIFICATE_PW }}
+        run: |
+          echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
+          security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
+          /usr/bin/codesign --force -s $CODESIGN_ID  -v --timestamp --options=runtime --entitlements ./entitlements.plist ./cnquery
+      - name: Show Security Identities
+        run: |
+          security find-identity -v 
+
 

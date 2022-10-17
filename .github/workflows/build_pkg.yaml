@@ -29,6 +29,11 @@ jobs:
           cd ${GITHUB_WORKSPACE}/dist/macos/
           mkdir mac_darwin_arm64 && cd mac_darwin_arm64
           curl -sL https://files.cuddletech.com/mondoohq/cnquery/releases/download/v${{ env.CNQUERY_VERSION}}/cnquery_${{env.CNQUERY_VERSION}}_darwin_arm64.tar.gz | tar xfvz -   
+      - name: Setup keychain for signing certificates
+        uses: apple-actions/import-codesign-certs@v1
+        with: 
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_INSTALLER }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PW }}
       - name: Run Mac Packager
         run: |
           pwd
