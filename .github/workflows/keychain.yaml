@@ -13,11 +13,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Setup keychain for signing certificates
-        uses: apple-actions/import-codesign-certs@v1
-        with: 
-          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_INSTALLER }}
-          p12-password: ${{ secrets.APPLE_CERTIFICATE_PW }}
+      - name: Setup local keychain for signing certificates
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          # Setup Keychain:
+          security create-keychain -p ${{ secrets.APPLE_KEYCHAIN_PASSWORD }} $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p ${{ secrets.APPLE_KEYCHAIN_PASSWORD }} $KEYCHAIN_PATH
+          # Import Certificates:
+          echo ${{ secrets.APPLE_KEYS_PRODUCTSIGN }} | base64 --decode > $RUNNER_TEMP/AppleKeysProductSign.p12
+          echo ${{ secrets.APPLE_KEYS_INSTALLER }} | base64 --decode > $RUNNER_TEMP/AppleKeysInstaller.p12
+          security import $RUNNER_TEMP/AppleKeysProductSign.p12 -P ${{ secrets.APPLE_KEYS_PASSWORD }} -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security import $RUNNER_TEMP/AppleKeysInstaller.p12 -P ${{ secrets.APPLE_KEYS_PASSWORD }} -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
       - name: Show Security Identities
         run: |
           security find-identity -v
@@ -26,5 +34,8 @@ jobs:
           curl -O https://releases.mondoo.io/cnquery/7.0.0-alpha1/cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           tar xfvz cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ./cnquery
+      - name: Import PKG Signing certificate
+        run: |
+          security import ./certs/MondooInstaller.p12 -k ~/Library/Keychains/login.keychain-db -P ${{ secrets.APPLE_CERTIFICATE_PW }} -T /usr/bin/productsign
 
 
