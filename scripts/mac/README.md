@@ -127,3 +127,16 @@ Considering the names of other packages out there:
 
 Ultimate, it appears "darwin" is still in common usage and the Hashicorp naming is a good middle ground (plus we already use it and no other format is objectively better), therefore we'll use the naming scheme: mondoo_1.2.3_darwin_universal.pkg
 
+# Signing and Notarization
+
+This repository requires several Github Action Secrets to sign and notarize:
+
+- APPLE_KEYS_PASSWORD: Cleartext password to decrypt the p12 file's (same pass used on both!)
+- APPLE_KEYS_CODESIGN: base64 encoded p12 for Developer\ ID\ Application-\ Mondoo\,\ Inc.\ \(W2KUBWKG84\)
+- APPLE_KEYS_CODESIGN_ID: Cleartext ID: "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" 
+- APPLE_KEYS_PRODUCTSIGN: base64 encoded p12 for Developer\ ID\ Installer-\ Mondoo\,\ Inc.\ \(W2KUBWKG84\)
+- APPLE_KEYS_PRODUCTSIGN_ID: Cleartext ID: "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)"
+- APPLE_ACCOUNT_USERNAME: The AppleID username for access to the Notarization service ("apple-builder@mondoo.io")
+- APPLE_ACCOUNT_PASSWORD: The "App Specific Password" for use when Notorizing Mac packages, to rotate this password login to appleid.apple.com/account as the above user (login credentials are in BitWarden, in the "Apple ID: Notorizing Account" item)
+
+The Certificates & P12's can be found in Google Drive.  Refer to our internal documentation in [Notion: Apple Developer Network](https://www.notion.so/mondoo/Apple-15b14791a0f54609978a5e52fd8e6cfb#562019a837bf450e89dd3d7926f279ab).
