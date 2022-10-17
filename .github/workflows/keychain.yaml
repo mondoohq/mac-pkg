@@ -38,6 +38,19 @@ jobs:
         run: |
           curl -O https://releases.mondoo.io/mondoo/6.19.1/mondoo_6.19.1_darwin_universal.pkg
           productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" mondoo_6.19.1_darwin_universal.pkg mondoo_6.19.1_darwin_signed.pkg
+      - name: "Notarize Release Build PKG"
+        uses: devbotsxyz/xcode-notarize@v1 
+        with:
+          product-path: mondoo_6.19.1_darwin_signed.pkg
+          appstore-connect-username: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
+          appstore-connect-password: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
+          primary-bundle-id: 'BUNDLE_ID'
+
+      - name: "Staple Release Build"
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: mondoo_6.19.1_darwin_signed.pkg
+
 
 
 
