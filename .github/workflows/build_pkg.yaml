@@ -1,4 +1,4 @@
-name: Build MacOS Package for cnquery
+name: Build MacOS Package
 
 on:
   workflow_dispatch:
