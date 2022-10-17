@@ -37,6 +37,7 @@ jobs:
         env:
           APPLE_KEYS_CODESIGN_ID: ${{ secrets.APPLE_KEYS_CODESIGN_ID }}
           APPLE_KEYS_PRODUCTSIGN_ID: ${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}
+          PKGNAME: ${{ inputs.name }}
         run: |
           ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ inputs.version }}
       - name: Inspect Distribution
