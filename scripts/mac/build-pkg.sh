@@ -58,12 +58,13 @@ bash packager/build-package.sh ${PKGNAME} ${VERSION}
 
 PKG=${BLDDIR}/scripts/mac/packager/target/pkg/${PKGNAME}-macos-universal-${VERSION}.pkg
 if [ -f $PKG ]; then
-  mv $PKG .
-  echo "SUCCESS! Your package is ready to rock, hot and fresh: ${PKGNAME}-macos-universal-${VERSION}.pkg"
+  ls -l $PKG
+  sha256sum $PKG
+  cp ${PKG} ${BLDDIR}/dist/
+  echo "SUCCESS! Your package is ready to rock, hot and fresh: dist/${PKGNAME}-macos-universal-${VERSION}.pkg"
 else 
   echo "ERROR: Something went wrong building the package... time to debug. :(" 
   exit 2
 fi
 
 # Done!  Copy to dist for next step!  (Sign & Notarize)
-cp ${PKG} ${BLDDIR}/dist/
