@@ -8,7 +8,7 @@ env:
 
 jobs:
   pkg:
-    name: 'Key Setup'
+    name: 'Signing and Notarization Test Action'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -26,19 +26,19 @@ jobs:
           security import $RUNNER_TEMP/AppleKeysProductSign.p12 -P ${{ secrets.APPLE_KEYS_PASSWORD }} -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security import $RUNNER_TEMP/AppleKeysCodeSign.p12 -P ${{ secrets.APPLE_KEYS_PASSWORD }} -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
-      - name: Show Security Identities
+      - name: Validate available security identities...
         run: |
           security find-identity -v
-      - name: Codesign executable
+      - name: Binary Code Signing (codesign)
         run: |
           curl -O https://releases.mondoo.io/cnquery/7.0.0-alpha1/cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           tar xfvz cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
-          codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ./cnquery
-      - name: PackageSign sample Package
+          codesign -s "${{ secrets.APPLE_KEYS_CODESIGN_ID }}" -f -v --timestamp --options runtime ./cnquery
+      - name: Package Sign Sample Package (productsign)
         run: |
           curl -O https://releases.mondoo.io/mondoo/6.19.1/mondoo_6.19.1_darwin_universal.pkg
-          productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" mondoo_6.19.1_darwin_universal.pkg mondoo_6.19.1_darwin_signed.pkg
-      - name: "Notarize Release Build PKG"
+          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" mondoo_6.19.1_darwin_universal.pkg mondoo_6.19.1_darwin_signed.pkg
+      - name: "Notarize Signed PKG"
         uses: devbotsxyz/xcode-notarize@v1 
         with:
           product-path: mondoo_6.19.1_darwin_signed.pkg
@@ -50,7 +50,11 @@ jobs:
         uses: devbotsxyz/xcode-staple@v1
         with:
           product-path: mondoo_6.19.1_darwin_signed.pkg
-
+      - name: Archive Notarized Package
+        uses: actions/upload-artifact@v2
+        with:
+          name: notarized-package
+          path: mondoo_6.19.1_darwin_signed.pkg
 
 
 
