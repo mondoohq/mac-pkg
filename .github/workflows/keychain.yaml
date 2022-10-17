@@ -34,8 +34,10 @@ jobs:
           curl -O https://releases.mondoo.io/cnquery/7.0.0-alpha1/cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           tar xfvz cnquery_7.0.0-alpha1_darwin_amd64.tar.gz
           codesign -s "Developer ID Application: Mondoo, Inc. (W2KUBWKG84)" -f -v --timestamp --options runtime ./cnquery
-      - name: Import PKG Signing certificate
+      - name: PackageSign sample Package
         run: |
-          security import ./certs/MondooInstaller.p12 -k ~/Library/Keychains/login.keychain-db -P ${{ secrets.APPLE_CERTIFICATE_PW }} -T /usr/bin/productsign
+          curl -O https://releases.mondoo.io/mondoo/6.19.1/mondoo_6.19.1_darwin_universal.pkg
+          productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" mondoo_6.19.1_darwin_universal.pkg
+
 
 
