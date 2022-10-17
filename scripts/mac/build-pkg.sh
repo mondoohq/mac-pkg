@@ -58,8 +58,8 @@ bash packager/build-package.sh ${PKGNAME} ${VERSION}
 
 PKG=${BLDDIR}/scripts/mac/packager/target/pkg/${PKGNAME}-macos-universal-${VERSION}.pkg
 if [ -f $PKG ]; then
-  ls -l $PKG
-  sha256sum $PKG
+  ls -lh $PKG
+  shasum -a 256 $PKG
   cp ${PKG} ${BLDDIR}/dist/
   echo "SUCCESS! Your package is ready to rock, hot and fresh: dist/${PKGNAME}-macos-universal-${VERSION}.pkg"
 else 

@@ -42,7 +42,7 @@ jobs:
           ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ inputs.version }}
       - name: Inspect Distribution
         if: ${{ always() }}
-        run: ls -lR dist
+        run: ls -lhR 
       ########## Sign Package. ##########
       - name: Package Sign Sample Package (productsign)
         run: |
