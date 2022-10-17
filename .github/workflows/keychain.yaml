@@ -37,7 +37,7 @@ jobs:
       - name: PackageSign sample Package
         run: |
           curl -O https://releases.mondoo.io/mondoo/6.19.1/mondoo_6.19.1_darwin_universal.pkg
-          productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" mondoo_6.19.1_darwin_universal.pkg
+          productsign --sign "Developer ID Installer: Mondoo, Inc. (W2KUBWKG84)" mondoo_6.19.1_darwin_universal.pkg mondoo_6.19.1_darwin_signed.pkg
 
 
 
