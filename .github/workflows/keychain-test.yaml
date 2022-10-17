@@ -1,4 +1,4 @@
-name: Keychain Test Action
+name: TEST Sign and Notarize
 
 on:
   workflow_dispatch:  
