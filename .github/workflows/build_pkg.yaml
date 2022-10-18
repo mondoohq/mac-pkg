@@ -62,9 +62,10 @@ jobs:
           product-path: dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
       ########## Save Package as Artifact. ##########
       - name: Archive Notarized Package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: notarized-package
           path: dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
+          retention-days: 30
       
 
