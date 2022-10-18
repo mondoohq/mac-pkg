@@ -5,7 +5,7 @@
 #Parameters
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 TARGET_DIRECTORY="$SCRIPTPATH/target"
-PRODUCT=${1}
+PRODUCT=`echo ${1} | awk '{for (i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1'`
 VERSION=${2}
 DATE=`date +%Y-%m-%d`
 TIME=`date +%H:%M:%S`

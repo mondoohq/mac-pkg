@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Custermize this for your application
+#Customize this for your application
 APPLICATION_FILE_PATH=bin/mondoo
 
 #Parameters
@@ -14,8 +14,10 @@ cd ${PRODUCT_HOME}
 chmod -R 755 .
 [ -d /usr/local/bin ] || mkdir /usr/local/bin
 
-#Add application shortcut to /usr/local/bin
-ln -s ${PRODUCT_HOME}/${APPLICATION_FILE_PATH} /usr/local/bin/mondoo
+#Add application shortcuts to /usr/local/bin
+for bin in `ls ${PRODUCT_HOME}/bin`; do
+    ln -sf ${PRODUCT_HOME}/bin/${bin} /usr/local/bin/${bin}
+done
 
 # Install Launchd:
 echo "Installing launchd service"

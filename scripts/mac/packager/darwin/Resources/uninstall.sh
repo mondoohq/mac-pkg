@@ -42,7 +42,9 @@ PRODUCT=__PRODUCT__
 
 echo "Application uninstalling process started"
 # remove link to shorcut file
-find "/usr/local/bin/" -name "__PRODUCT__" | xargs rm
+for bin in `ls ${PRODUCT_HOME}/bin`; do
+    rm /usr/local/bin/${bin}
+done
 if [ $? -eq 0 ]
 then
   echo "[1/4] [DONE] Successfully deleted shortcut links"
