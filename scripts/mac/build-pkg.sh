@@ -46,8 +46,8 @@ for DIST in mondoo cnquery cnspec; do
   fi
   echo "Code Signing ${DIST}..."
   codesign -s "${APPLE_KEYS_CODESIGN_ID}" -f -v --timestamp --options runtime ${DIST}
-  mkdir -p ${BLDDIR}/script/mac/packager/application/bin/
-  cp ${DIST} ${BLDDIR}/script/mac/packager/application/bin/
+  mkdir -p ${BLDDIR}/scripts/mac/packager/application/bin/
+  cp ${DIST} ${BLDDIR}/scripts/mac/packager/application/bin/
 done
 
 
