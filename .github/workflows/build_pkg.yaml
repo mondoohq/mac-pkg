@@ -33,12 +33,13 @@ jobs:
       - name: Unified Version
         id: version
         run: |
-          if [[ ${{ inputs.name }} == '' ]]; then
+          INPUT_NAME=${{ inputs.name }}
+          if [[ ${INPUT_NAME} == '' ]]; then
             echo "Name is empty, using default"
             echo "name=mondoo" >> $GITHUB_OUTPUT
           else
-            echo "Name: ${{ inputs.name }}"
-            echo "name=${{ inputs.name }}" >> $GITHUB_OUTPUT
+            echo "Name: ${INPUT_NAME}"
+            echo "name=${INPUT_NAME}" >> $GITHUB_OUTPUT
           fi
           echo "Version: $VERSION"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
