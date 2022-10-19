@@ -9,8 +9,10 @@ on:
         default: '0.0.1'
       name:
         description: 'Package Name'
-        required: true
+        required: false
         default: 'mondoo'
+  repository_dispatch:
+    types: [update]
 
 jobs:
   pkg:
@@ -19,6 +21,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Set Version (Workflow Dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo VERSION=${{ inputs.version }} >> $GITHUB_ENV
+      - name: Set Version (Repository Dispatch)
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo VERSION=${{ github.event.client_payload.version }} >> $GITHUB_ENV
+      - name: Unified Version
+        id: version
+        run: |
+          if [[ ${{ inputs.name }} == '' ]]; then
+            echo "Name is empty, using default"
+            echo "name=mondoo" >> $GITHUB_OUTPUT
+          else
+            echo "Name: ${{ inputs.name }}"
+            echo "name=${{ inputs.name }}" >> $GITHUB_OUTPUT
+          fi
+          echo "Version: $VERSION"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Setup local keychain for signing certificates
         run: |
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
@@ -37,35 +61,35 @@ jobs:
         env:
           APPLE_KEYS_CODESIGN_ID: ${{ secrets.APPLE_KEYS_CODESIGN_ID }}
           APPLE_KEYS_PRODUCTSIGN_ID: ${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}
-          PKGNAME: ${{ inputs.name }}
+          PKGNAME: ${{ steps.version.outputs.name }}
         run: |
-          ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ inputs.version }}
+          ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ steps.version.outputs.version }}
       - name: Inspect Distribution
         if: ${{ always() }}
         run: ls -lhR 
       ########## Sign Package. ##########
       - name: Package Sign Sample Package (productsign)
         run: |
-          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.pkg dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
+          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}-macos-universal-${{ steps.version.outputs.version }}.pkg dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
       ########## Sign Package. ##########
       - name: "Notarize Signed PKG"
         uses: devbotsxyz/xcode-notarize@v1 
         with:
-          product-path: dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
+          product-path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
           appstore-connect-username: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
           appstore-connect-password: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
-          primary-bundle-id: 'com.mondoo.client'
+          primary-bundle-id: 'com.${{ steps.version.outputs.name }}.client'
 
       - name: "Staple Release Build"
         uses: devbotsxyz/xcode-staple@v1
         with:
-          product-path: dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
+          product-path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
       ########## Save Package as Artifact. ##########
       - name: Archive Notarized Package
         uses: actions/upload-artifact@v3
         with:
           name: notarized-package
-          path: dist/${{ inputs.name }}-macos-universal-${{ inputs.version }}.signed.pkg
+          path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
           retention-days: 30
       
 
