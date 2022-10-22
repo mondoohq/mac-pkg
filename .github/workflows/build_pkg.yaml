@@ -120,7 +120,7 @@ jobs:
           VERSION=${PKG:7:5}
           echo "CHECKSUM=${CHECKSUM}" >> $GITHUB_ENV
           echo "PKG=$PKG" >> $GITHUB_ENV
-          echo "version=${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Authenticate with Google Cloud
         uses: 'google-github-actions/auth@v0'
         with:
