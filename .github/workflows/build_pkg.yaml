@@ -71,7 +71,7 @@ jobs:
       ########## Sign Package. ##########
       - name: Package Sign Sample Package (productsign)
         run: |
-          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
+          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}-macos-universal-${{ steps.version.outputs.version }}.pkg dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
       ########## Sign Package. ##########
       - name: "Notarize Signed PKG"
         uses: devbotsxyz/xcode-notarize@v1 
