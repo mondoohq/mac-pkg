@@ -71,12 +71,12 @@ jobs:
       ########## Sign Package. ##########
       - name: Package Sign Sample Package (productsign)
         run: |
-          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}-macos-universal-${{ steps.version.outputs.version }}.pkg dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
+          productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
       ########## Sign Package. ##########
       - name: "Notarize Signed PKG"
         uses: devbotsxyz/xcode-notarize@v1 
         with:
-          product-path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
+          product-path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
           appstore-connect-username: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
           appstore-connect-password: ${{ secrets.APPLE_ACCOUNT_PASSWORD }}
           primary-bundle-id: 'com.${{ steps.version.outputs.name }}.client'
@@ -84,13 +84,59 @@ jobs:
       - name: "Staple Release Build"
         uses: devbotsxyz/xcode-staple@v1
         with:
-          product-path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
+          product-path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
       ########## Save Package as Artifact. ##########
       - name: Archive Notarized Package
         uses: actions/upload-artifact@v3
         with:
           name: notarized-package
-          path: dist/${{ steps.version.outputs.name }}-darwin-universal-${{ steps.version.outputs.version }}.pkg
+          path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
           retention-days: 30
       
-
+  publish:
+    name: 'Publish: Releases'
+    needs: pkg
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Download Notarized Package
+        uses: actions/download-artifact@v3
+        with:
+          name: notarized-package
+          path: dist
+      - name: Get Version & Checksum 
+        run: |
+          cd dist
+          # Ensure we only have a single file 
+          FILES=`ls *.pkg | wc -l`
+          if [[ $FILES != 1 ]]; then 
+            echo "We have more than one file in the dist folder. This is not expected."
+            exit 1
+          fi
+          # Extract the data we need to upload the package
+          CHECKSUM=`sha256sum *.pkg`
+          PKG=`ls *.pkg`
+          VERSION=${PKG:7:5}
+          echo "CHECKSUM=${CHECKSUM}" >> $GITHUB_ENV
+          echo "PKG=$PKG" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_ENV
+      - name: Authenticate with Google Cloud
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{secrets.GCP_CREDENTIALS}}'
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'    
+      - name: Verify access to release bucket
+        run: |
+          gsutil ls gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
+      - name: Upload static content to buckets
+        run: |
+          cd dist
+          # Download and re-write the checksum file
+          gsutil cp gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt checksums.orig
+          cat checksums.orig | grep -v universal > checksums.macos.txt
+          echo $CHECKSUM >> checksums.macos.txt
+          gsutil cp checksums.macos.txt gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
+          # Overwrite the Universal Package
+          gsutil cp ${PKG} gs://releases-us.mondoo.io/mondoo/${VERSION}/${PKG}
