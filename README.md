@@ -1,3 +1,6 @@
+[![Build MacOS Package](https://github.com/mondoohq/mac-pkg/actions/workflows/build_pkg.yaml/badge.svg)](https://github.com/mondoohq/mac-pkg/actions/workflows/build_pkg.yaml)
+
+[![Build MacOS Package](https://github.com/mondoohq/mac-pkg/actions/workflows/build_pkg.yaml/badge.svg)](https://github.com/mondoohq/mac-pkg/actions/workflows/build_pkg.yaml)
 # Mondoo's MacOS Package Builder
 
 This repo is responsible for building the Mondoo client package for OSX.  It:
