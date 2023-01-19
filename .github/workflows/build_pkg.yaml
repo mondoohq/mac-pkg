@@ -129,14 +129,14 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v0'    
       - name: Verify access to release bucket
         run: |
-          gsutil ls gs://releases-us.mondoo.io/mondoo/mondoo_${VERSION}/checksums.macos.txt
+          gsutil ls gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
       - name: Upload static content to buckets
         run: |
           cd dist
           # Download and re-write the checksum file
-          gsutil cp gs://releases-us.mondoo.io/mondoo/mondoo_${VERSION}/checksums.macos.txt checksums.orig
+          gsutil cp gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt checksums.orig
           cat checksums.orig | grep -v universal > checksums.macos.txt
           echo $CHECKSUM >> checksums.macos.txt
-          gsutil cp checksums.macos.txt gs://releases-us.mondoo.io/mondoo/mondoo_${VERSION}/checksums.macos.txt
+          gsutil cp checksums.macos.txt gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
           # Overwrite the Universal Package
-          gsutil cp ${PKG} gs://releases-us.mondoo.io/mondoo/mondoo_${VERSION}/${PKG}
+          gsutil cp ${PKG} gs://releases-us.mondoo.io/mondoo/${VERSION}/${PKG}
