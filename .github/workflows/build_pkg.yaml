@@ -117,7 +117,8 @@ jobs:
           # Extract the data we need to upload the package
           CHECKSUM=`sha256sum *.pkg`
           PKG=`ls *.pkg`
-          VERSION=${PKG:7:5}
+          VERSION=`echo $PKG | cut -d_ -f2`
+          # Persist the variables 
           echo "CHECKSUM=${CHECKSUM}" >> $GITHUB_ENV
           echo "PKG=$PKG" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
