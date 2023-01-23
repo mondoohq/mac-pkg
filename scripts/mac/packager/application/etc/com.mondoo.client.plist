@@ -6,7 +6,7 @@
 	<string>com.mondoo.client</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Library/Mondoo/bin/mondoo</string>
+		<string>/Library/Mondoo/bin/cnspec</string>
 		<string>serve</string>
 		<string>--config</string>
 		<string>~/.config/mondoo/mondoo.yml</string>
