@@ -11,6 +11,11 @@ on:
         description: 'Package Name'
         required: false
         default: 'mondoo'
+      skip-publish:
+        description: 'Skip publish?'
+        required: false
+        default: false
+        type: boolean
   repository_dispatch:
     types: [update]
 
@@ -96,6 +101,7 @@ jobs:
   publish:
     name: 'Publish: Releases'
     needs: pkg
+    if: ${{ ! inputs.skip-publish }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
