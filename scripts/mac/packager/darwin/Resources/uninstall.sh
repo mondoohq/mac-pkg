@@ -42,7 +42,7 @@ PRODUCT=__PRODUCT__
 
 echo "Application uninstalling process started"
 # remove link to shorcut file
-for bin in `ls ${PRODUCT_HOME}/bin`; do
+for bin in `ls /Library/${PRODUCT}/bin`; do
     rm /usr/local/bin/${bin}
 done
 if [ $? -eq 0 ]
