@@ -143,7 +143,7 @@ jobs:
           # Download and re-write the checksum file
           gsutil cp gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt checksums.orig
           cat checksums.orig | grep -v universal > checksums.macos.txt
-          echo $CHECKSUM >> checksums.macos.txt
+          echo "${CHECKSUM}" >> checksums.macos.txt
           gsutil cp checksums.macos.txt gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
           # Overwrite the Universal Package
           gsutil cp ${PKG} gs://releases-us.mondoo.io/mondoo/${VERSION}/${PKG}
