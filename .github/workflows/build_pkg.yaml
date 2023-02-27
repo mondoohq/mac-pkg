@@ -154,6 +154,6 @@ jobs:
           repository: "mondoohq/releasr"
           event-type: reindex
           client-payload: '{
-            "reindex-path": "${{ github.event.repository.reindex-path }}",
+            "reindex-path": "mondoo/${{ env.VERSION }}",
             "bucket": "releases-us.mondoo.io"
             }'
