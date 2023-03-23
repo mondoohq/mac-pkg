@@ -28,6 +28,7 @@ echo "Packaging Release ${VERSION}"
 # Pull Latest Binaries & Create Universal Binaries
 for DIST in mondoo cnquery cnspec; do
   cd $BLDDIR
+
   mkdir -p dist/${DIST}
   for ARCH in amd64 arm64; do
     cd ${BLDDIR}/dist/${DIST}
@@ -37,13 +38,20 @@ for DIST in mondoo cnquery cnspec; do
     tar -xzf ${DIST}-${ARCH}.tgz
     rm ${DIST}-${ARCH}.tgz
   done
+
   cd $BLDDIR/dist/${DIST}
+
   echo "Creating Universal Binary for ${DIST}..."
-  /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
-  if [ ! -f ${DIST} ]; then
-    echo "ERROR: Failed to create universal ${DIST} binary"
-    exit 1
+  if [ ${DIST} = 'mondoo']; then
+    cp amd64/${DIST} ${DIST}
+  else
+    /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
+    if [ ! -f ${DIST} ]; then
+      echo "ERROR: Failed to create universal ${DIST} binary"
+      exit 1
+    fi
   fi
+
   echo "Code Signing ${DIST}..."
   codesign -s "${APPLE_KEYS_CODESIGN_ID}" -f -v --timestamp --options runtime ${DIST}
   mkdir -p ${BLDDIR}/scripts/mac/packager/application/bin/
