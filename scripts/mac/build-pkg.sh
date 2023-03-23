@@ -42,7 +42,7 @@ for DIST in mondoo cnquery cnspec; do
   cd $BLDDIR/dist/${DIST}
 
   echo "Creating Universal Binary for ${DIST}..."
-  if [ ${DIST} = 'mondoo']; then
+  if [[ ${DIST} == 'mondoo']]; then
     cp amd64/${DIST} ${DIST}
   else
     /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
