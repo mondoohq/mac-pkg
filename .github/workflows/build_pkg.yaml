@@ -157,3 +157,12 @@ jobs:
             "reindex-path": "mondoo/${{ env.VERSION }}",
             "bucket": "releases-us.mondoo.io"
             }'
+      - name: Wait a minute...
+        run: sleep 60
+      - name: Trigger Homebrew Generation
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_API_TOKEN }}
+          repository: "mondoohq/homebrew-mondoo"
+          event-type: update
+          client-payload: '{"version": "${{ env.VERSION }}"}'
