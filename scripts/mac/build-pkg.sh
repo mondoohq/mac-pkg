@@ -26,7 +26,7 @@ echo "Packaging Release ${VERSION}"
 
 ###############################################################################################################
 # Pull Latest Binaries & Create Universal Binaries
-for DIST in mondoo cnquery cnspec; do
+for DIST in cnquery cnspec; do
   cd $BLDDIR
 
   mkdir -p dist/${DIST}
@@ -34,7 +34,7 @@ for DIST in mondoo cnquery cnspec; do
     cd ${BLDDIR}/dist/${DIST}
     echo "Downloading ${DIST} for ${ARCH}"
     mkdir ${ARCH} && cd ${ARCH}
-    curl -sL -o ${DIST}-${ARCH}.tgz https://install.mondoo.com/package/${DIST}/darwin/${ARCH}/tar.gz/latest/download
+    curl -sL -o ${DIST}-${ARCH}.tgz https://github.com/mondoohq/${DIST}/releases/download/v${VERSION}/${DIST}_${VERSION}_darwin_${ARCH}.tar.gz
     tar -xzf ${DIST}-${ARCH}.tgz
     rm ${DIST}-${ARCH}.tgz
   done
@@ -42,15 +42,12 @@ for DIST in mondoo cnquery cnspec; do
   cd $BLDDIR/dist/${DIST}
 
   echo "Creating Universal Binary for ${DIST}..."
-  if [ ${DIST} == 'mondoo' ]; then
-    cp amd64/${DIST} ${DIST}
-  else
-    /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
-    if [ ! -f ${DIST} ]; then
-      echo "ERROR: Failed to create universal ${DIST} binary"
-      exit 1
-    fi
+  /usr/bin/lipo -create -output ${DIST} amd64/${DIST} arm64/${DIST}
+  if [ ! -f ${DIST} ]; then
+    echo "ERROR: Failed to create universal ${DIST} binary"
+    exit 1
   fi
+
 
   echo "Code Signing ${DIST}..."
   codesign -s "${APPLE_KEYS_CODESIGN_ID}" -f -v --timestamp --options runtime ${DIST}
@@ -58,6 +55,8 @@ for DIST in mondoo cnquery cnspec; do
   cp ${DIST} ${BLDDIR}/scripts/mac/packager/application/bin/
 done
 
+# Insert mondoo shim (to be removed in v9.x.x)
+curl -sL -o ${BLDDIR}/scripts/mac/packager/application/bin/mondoo https://raw.githubusercontent.com/mondoohq/installer/main/helper/mondoo.sh
 
 ###############################################################################################################
 echo "Building Package...."            
