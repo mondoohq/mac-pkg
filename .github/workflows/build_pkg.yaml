@@ -75,14 +75,14 @@ jobs:
           ${GITHUB_WORKSPACE}/scripts/mac/build-pkg.sh ${{ steps.version.outputs.version }}
       - name: Inspect Distribution
         if: ${{ always() }}
-        run: ls -lhR 
+        run: ls -lhR
       ########## Sign Package. ##########
       - name: Package Sign Sample Package (productsign)
         run: |
           productsign --sign "${{ secrets.APPLE_KEYS_PRODUCTSIGN_ID }}" dist/${{ steps.version.outputs.name }}-macos-universal-${{ steps.version.outputs.version }}.pkg dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
       ########## Sign Package. ##########
       - name: "Notarize Signed PKG"
-        uses: devbotsxyz/xcode-notarize@v1 
+        uses: wpilibsuite/xcode-notarize@v1
         with:
           product-path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
           appstore-connect-username: ${{ secrets.APPLE_ACCOUNT_USERNAME }}
@@ -90,7 +90,7 @@ jobs:
           primary-bundle-id: 'com.${{ steps.version.outputs.name }}.client'
 
       - name: "Staple Release Build"
-        uses: devbotsxyz/xcode-staple@v1
+        uses: keehun/xcode-staple@v1
         with:
           product-path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
       ########## Save Package as Artifact. ##########
@@ -100,7 +100,7 @@ jobs:
           name: notarized-package
           path: dist/${{ steps.version.outputs.name }}_${{ steps.version.outputs.version }}_darwin_universal.pkg
           retention-days: 30
-      
+
   publish:
     name: 'Publish: Releases'
     needs: pkg
@@ -114,12 +114,12 @@ jobs:
         with:
           name: notarized-package
           path: dist
-      - name: Get Version & Checksum 
+      - name: Get Version & Checksum
         run: |
           cd dist
-          # Ensure we only have a single file 
+          # Ensure we only have a single file
           FILES=`ls *.pkg | wc -l`
-          if [[ $FILES != 1 ]]; then 
+          if [[ $FILES != 1 ]]; then
             echo "We have more than one file in the dist folder. This is not expected."
             exit 1
           fi
@@ -127,7 +127,7 @@ jobs:
           CHECKSUM=`sha256sum *.pkg`
           PKG=`ls *.pkg`
           VERSION=`echo $PKG | cut -d_ -f2`
-          # Persist the variables 
+          # Persist the variables
           echo "CHECKSUM=${CHECKSUM}" >> $GITHUB_ENV
           echo "PKG=$PKG" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
@@ -136,7 +136,7 @@ jobs:
         with:
           credentials_json: '${{secrets.GCP_CREDENTIALS}}'
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'    
+        uses: 'google-github-actions/setup-gcloud@v0'
       - name: Verify access to release bucket
         run: |
           gsutil ls gs://releases-us.mondoo.io/mondoo/${VERSION}/checksums.macos.txt
